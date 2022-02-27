@@ -49,7 +49,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
     
-    // 단축키 정부
+    // 단축키 내용을 리소스에서 가져오는 함수
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY20220214WINAPI2D));
 
     // 기본 메세지 루프입니다:
@@ -152,6 +152,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    // 실제 내용 창이 크기에 맞게끔 하도록 사이즈.
    AdjustWindowRect(&rc, WINSTYLE, false);
    // 위에서 얻은 사이즈로 윈도우 사이즈를 세팅하자.
+   SetWindowPos(hWnd, NULL, WINSTARTX, WINSTARTY, (rc.right - rc.left), (rc.bottom - rc.top), SWP_NOZORDER | SWP_NOMOVE);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -169,6 +170,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
 //
 //
+
+POINT g_mousePos = { 0,0 };
+POINT g_keyPos = { 0,0 };
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -190,11 +195,50 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    case WM_LBUTTONDOWN:
+        
+        break;
+    case WM_LBUTTONUP:
+        break;
+    case WM_MOUSEMOVE:
+		g_mousePos.x = LOWORD(lParam);
+		g_mousePos.y = HIWORD(lParam);
+		InvalidateRect(hWnd, NULL, FALSE);
+        break;
+    case WM_KEYDOWN:
+        switch (wParam) 
+        {
+        case VK_LEFT:
+        case 'A':
+            g_keyPos.x -= 10;
+            break;
+        case VK_RIGHT:
+        case 'D':
+            g_keyPos.x += 10;
+            break;
+        case VK_UP:
+        case 'W':
+            g_keyPos.y -= 10;
+            break;
+        case VK_DOWN:
+        case'S':
+            g_keyPos.y += 10;
+            break;
+        }
+        InvalidateRect(hWnd, NULL, FALSE);
+        break;
+    case WM_KEYUP:
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
+            // TODO: 여기에 hdc 를 사용하는 그리기 코드를 추가합니다...
+
+            Ellipse(hdc, 100, 100, 500, 500);
+            Rectangle(hdc, g_keyPos.x - 100, g_keyPos.y - 100, g_keyPos.x + 100, g_keyPos.y + 100);
+            Ellipse(hdc, g_mousePos.x - 50, g_mousePos.y - 50, g_mousePos.x + 50, g_mousePos.y + 50);
+
             EndPaint(hWnd, &ps);
         }
         break;
